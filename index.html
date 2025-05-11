@@ -5,19 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>كشكولي</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Tajawal', sans-serif;
       background: #f8f9fa;
       color: #2c3e50;
       direction: rtl;
     }
-
     header {
       background: #2c3e50;
       color: white;
@@ -30,13 +24,11 @@
       text-align: center;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
     main {
       margin-top: 60px;
       padding: 20px;
       min-height: calc(100vh - 60px);
     }
-
     .toolbar {
       position: fixed;
       top: 60px;
@@ -49,7 +41,6 @@
       flex-wrap: wrap;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
     .folder, .lesson {
       background: white;
       border-radius: 8px;
@@ -60,11 +51,7 @@
       cursor: pointer;
       transition: transform 0.2s;
     }
-
-    .folder:hover, .lesson:hover {
-      transform: translateX(-5px);
-    }
-
+    .folder:hover, .lesson:hover { transform: translateX(-5px); }
     .actions {
       position: absolute;
       left: 10px;
@@ -73,145 +60,97 @@
       display: flex;
       gap: 5px;
     }
-
     button {
       background-color: #3498db;
       color: white;
       border: none;
-      padding: 8px 15px;
+      padding: 6px 12px;
       border-radius: 5px;
       cursor: pointer;
-      min-width: 80px;
+      min-width: 60px;
       transition: all 0.2s;
     }
-
     button:hover {
       opacity: 0.9;
       transform: scale(0.98);
     }
-
     #editor {
       background: white;
       min-height: 500px;
       padding: 30px;
       border-radius: 10px;
-      margin-top: 50px;
+      margin-top: 130px;
       line-height: 1.6;
       font-size: 18px;
       border: 1px solid #ddd;
       outline: none;
     }
+    .title-box { background: #ecf0f1; border-right: 4px solid #3498db; padding: 15px; margin: 20px 0; }
+    .question-box { background: #fcf3cf; border-right: 4px solid #f1c40f; padding: 15px; margin: 20px 0; }
+    .answer-box { background: #d4efdf; border-right: 4px solid #2ecc71; padding: 15px; margin: 20px 0; }
 
-    .title-box {
-      background: #ecf0f1;
-      border-right: 4px solid #3498db;
-      padding: 15px;
-      margin: 20px 0;
-    }
-
-    .question-box {
-      background: #fcf3cf;
-      border-right: 4px solid #f1c40f;
-      padding: 15px;
-      margin: 20px 0;
-    }
-
-    .answer-box {
-      background: #d4efdf;
-      border-right: 4px solid #2ecc71;
-      padding: 15px;
-      margin: 20px 0;
-    }
-
-    /* تحسينات وضع الصورة الكاملة */
+    /* Fullscreen image viewer */
     .fullscreen-image {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.97);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 3000;
+      flex-direction: column;
     }
-
     .fullscreen-image img {
       max-width: 90%;
-      max-height: 90%;
+      max-height: 80%;
       object-fit: contain;
       cursor: pointer;
       transition: transform 0.3s ease;
     }
-
     .image-controls {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
       display: flex;
-      gap: 5px;
-      background: rgba(0,0,0,0.7);
-      padding: 10px 15px;
-      border-radius: 30px;
-      z-index: 3001;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 20px;
     }
-
     .control-btn {
-      width: 30px; /* حجم أصغر */
-      height: 30px; /* حجم أصغر */
+      width: 30px;
+      height: 30px;
       background: rgba(255,255,255,0.9);
       color: #333;
       border: none;
       border-radius: 50%;
-      cursor: pointer;
+      font-size: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px; /* حجم خط أصغر */
-      transition: all 0.2s;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
-
     .control-btn:hover {
       background: #3498db;
       color: white;
       transform: scale(1.1);
     }
 
-    .close-image-btn {
-      position: fixed;
-      top: 25px;
-      left: 25px;
-      width: 40px;
-      height: 40px;
+    /* Close button with image controls */
+    .image-controls .control-close {
       background: #e74c3c;
       color: white;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      z-index: 3002;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      font-size: 16px;
+      width: 40px;
+      height: 30px;
+      border-radius: 6px;
     }
 
-    /* تحسينات وضع القراءة */
     .reading-mode-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: white;
       z-index: 2000;
       padding: 60px 20px 20px;
       overflow-y: auto;
     }
-
     .close-reading-mode {
       position: fixed;
       top: 20px;
@@ -226,7 +165,14 @@
     }
 
     .search-box {
-      margin: 20px 0;
+      margin-top: 70px;
+      display: flex;
+      gap: 5px;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 16px;
     }
 
     .highlight {
@@ -235,9 +181,7 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>كشكولي</h1>
-  </header>
+  <header><h1>كشكولي</h1></header>
 
   <main>
     <section id="foldersPage">
@@ -256,6 +200,7 @@
     <section id="editorPage" style="display:none;">
       <button class="back-btn" onclick="showPage('lessonsPage')">← الرجوع</button>
       <h2 id="lessonTitle"></h2>
+
       <div class="toolbar">
         <button onclick="insertTemplate('title-box', 'عنوان جديد')">📌 عنوان</button>
         <button onclick="insertTemplate('question-box', 'سؤال جديد')">❓ سؤال</button>
@@ -269,12 +214,13 @@
         <input type="file" id="imageInput" accept="image/*" hidden>
         <button onclick="uploadImage()">🖼️ صورة</button>
         <button onclick="toggleReadingMode()">📖 قراءة</button>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="🔍 ابحث في النص..." oninput="highlightSearch()">
+          <button onclick="prevHighlight()">‹</button>
+          <button onclick="nextHighlight()">›</button>
+        </div>
       </div>
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="ابحث في النص..." oninput="highlightSearch()">
-        <button onclick="nextHighlight()">›</button>
-        <button onclick="prevHighlight()">‹</button>
-      </div>
+
       <div id="editor" contenteditable="true"></div>
     </section>
   </main>
@@ -285,134 +231,115 @@
     let currentLessonIndex = null;
     let highlightColor = '#ffff00';
     let isReadingMode = false;
-    let scale = 1;
-    let translateX = 0;
-    let translateY = 0;
-    let searchHighlights = [];
-    let currentHighlightIndex = -1;
+    let scale = 1, translateX = 0, translateY = 0;
+    let searchHighlights = [], currentHighlightIndex = -1;
 
-    // إدارة الصفحات
     function showPage(pageId) {
-      document.querySelectorAll('section').forEach(section => {
-        section.style.display = 'none';
-      });
+      document.querySelectorAll('section').forEach(s => s.style.display = 'none');
       document.getElementById(pageId).style.display = 'block';
     }
 
-    // المواد الدراسية
     function addFolder() {
       const name = prompt('أدخل اسم المادة:');
       if (name) {
         folders.push({ name, lessons: [] });
-        saveData();
-        renderFolders();
+        saveData(); renderFolders();
       }
     }
 
     function renderFolders() {
-      const foldersList = document.getElementById('foldersList');
-      foldersList.innerHTML = folders.map((folder, index) => `
-        <div class="folder" onclick="openFolder(${index})">
-          ${folder.name}
+      const list = document.getElementById('foldersList');
+      list.innerHTML = folders.map((f, i) => `
+        <div class="folder" onclick="openFolder(${i})">
+          ${f.name}
           <div class="actions">
-            <button onclick="event.stopPropagation(); editFolder(${index})">✏️</button>
-            <button onclick="event.stopPropagation(); deleteFolder(${index})">🗑️</button>
+            <button onclick="event.stopPropagation(); editFolder(${i})">✏️</button>
+            <button onclick="event.stopPropagation(); deleteFolder(${i})">🗑️</button>
           </div>
         </div>
       `).join('');
     }
 
-    function openFolder(index) {
-      currentFolderIndex = index;
-      document.getElementById('currentFolderTitle').textContent = folders[index].name;
-      renderLessons();
-      showPage('lessonsPage');
+    function openFolder(i) {
+      currentFolderIndex = i;
+      document.getElementById('currentFolderTitle').textContent = folders[i].name;
+      renderLessons(); showPage('lessonsPage');
     }
 
-    function editFolder(index) {
-      const newName = prompt('اسم المادة الجديد:', folders[index].name);
+    function editFolder(i) {
+      const newName = prompt('اسم المادة الجديد:', folders[i].name);
       if (newName) {
-        folders[index].name = newName;
-        saveData();
-        renderFolders();
+        folders[i].name = newName;
+        saveData(); renderFolders();
       }
     }
 
-    function deleteFolder(index) {
+    function deleteFolder(i) {
       if (confirm('هل تريد حذف هذه المادة؟')) {
-        folders.splice(index, 1);
-        saveData();
-        renderFolders();
+        folders.splice(i, 1);
+        saveData(); renderFolders();
       }
     }
 
-    // الدروس
     function addLesson() {
       const name = prompt('أدخل اسم الدرس:');
       if (name) {
         folders[currentFolderIndex].lessons.push({ name, content: '' });
-        saveData();
-        renderLessons();
+        saveData(); renderLessons();
       }
     }
 
     function renderLessons() {
-      const lessonsList = document.getElementById('lessonsList');
-      lessonsList.innerHTML = folders[currentFolderIndex].lessons.map((lesson, index) => `
-        <div class="lesson" onclick="openLesson(${index})">
-          ${lesson.name}
+      const list = document.getElementById('lessonsList');
+      list.innerHTML = folders[currentFolderIndex].lessons.map((l, i) => `
+        <div class="lesson" onclick="openLesson(${i})">
+          ${l.name}
           <div class="actions">
-            <button onclick="event.stopPropagation(); editLesson(${index})">✏️</button>
-            <button onclick="event.stopPropagation(); deleteLesson(${index})">🗑️</button>
+            <button onclick="event.stopPropagation(); editLesson(${i})">✏️</button>
+            <button onclick="event.stopPropagation(); deleteLesson(${i})">🗑️</button>
           </div>
         </div>
       `).join('');
     }
 
-    function openLesson(index) {
-      currentLessonIndex = index;
-      const lesson = folders[currentFolderIndex].lessons[index];
+    function openLesson(i) {
+      currentLessonIndex = i;
+      const lesson = folders[currentFolderIndex].lessons[i];
       document.getElementById('lessonTitle').textContent = lesson.name;
       document.getElementById('editor').innerHTML = lesson.content;
-      
-      // إعادة ربط أحداث الصور
+
       setTimeout(() => {
-        document.getElementById('editor').querySelectorAll('img').forEach(img => {
+        document.querySelectorAll('#editor img').forEach(img => {
           img.onclick = () => showFullscreenImage(img.src);
         });
       }, 100);
-      
+
       showPage('editorPage');
     }
 
-    function editLesson(index) {
-      const newName = prompt('اسم الدرس الجديد:', folders[currentFolderIndex].lessons[index].name);
+    function editLesson(i) {
+      const newName = prompt('اسم الدرس الجديد:', folders[currentFolderIndex].lessons[i].name);
       if (newName) {
-        folders[currentFolderIndex].lessons[index].name = newName;
-        saveData();
-        renderLessons();
+        folders[currentFolderIndex].lessons[i].name = newName;
+        saveData(); renderLessons();
       }
     }
 
-    function deleteLesson(index) {
+    function deleteLesson(i) {
       if (confirm('هل تريد حذف هذا الدرس؟')) {
-        folders[currentFolderIndex].lessons.splice(index, 1);
-        saveData();
-        renderLessons();
+        folders[currentFolderIndex].lessons.splice(i, 1);
+        saveData(); renderLessons();
       }
     }
 
-    // المحرر
     function insertTemplate(className, placeholder) {
       const sel = window.getSelection();
       if (!sel.rangeCount) return;
-      
       const range = sel.getRangeAt(0);
       const div = document.createElement('div');
       div.className = className;
       div.contentEditable = true;
       div.innerHTML = placeholder;
-      
       range.deleteContents();
       range.insertNode(div);
       range.setStartAfter(div);
@@ -422,14 +349,11 @@
       saveContent();
     }
 
-    function execCommand(command) {
-      document.execCommand(command);
-      saveContent();
+    function execCommand(cmd) {
+      document.execCommand(cmd); saveContent();
     }
 
-    function setHighlighterColor(color) {
-      highlightColor = color;
-    }
+    function setHighlighterColor(c) { highlightColor = c; }
 
     function applyHighlight() {
       document.execCommand('styleWithCSS', false, true);
@@ -437,8 +361,8 @@
       saveContent();
     }
 
-    function changeTextColor(color) {
-      document.execCommand('foreColor', false, color);
+    function changeTextColor(c) {
+      document.execCommand('foreColor', false, c);
       saveContent();
     }
 
@@ -449,12 +373,9 @@
     document.getElementById('imageInput').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
-
       if (file.size > 5 * 1024 * 1024) {
-        alert('الحد الأقصى لحجم الصورة 5MB');
-        return;
+        alert('الحد الأقصى 5MB'); return;
       }
-
       const reader = new FileReader();
       reader.onload = function(e) {
         const img = new Image();
@@ -468,77 +389,41 @@
       reader.readAsDataURL(file);
     });
 
-    // عرض الصورة بحجم كامل
     function showFullscreenImage(src) {
       const overlay = document.createElement('div');
       overlay.className = 'fullscreen-image';
-      
+
       const img = new Image();
       img.src = src;
       img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-      
-      // عناصر التحكم في الصورة
-      const controls = `
-        <button class="close-image-btn" onclick="overlay.remove()">✕</button>
+      overlay.appendChild(img);
+
+      overlay.innerHTML += `
         <div class="image-controls">
-          <button class="control-btn" onclick="moveImage(-50, 0)">←</button>
-          <button class="control-btn" onclick="moveImage(0, -50)">↑</button>
-          <button class="control-btn" onclick="zoom(1.1)">+</button>
-          <button class="control-btn" onclick="resetZoom()">⟳</button>
-          <button class="control-btn" onclick="zoom(0.9)">-</button>
-          <button class="control-btn" onclick="moveImage(0, 50)">↓</button>
-          <button class="control-btn" onclick="moveImage(50, 0)">→</button>
+          <button class="control-btn" onclick="zoom(1.1)">➕</button>
+          <button class="control-btn" onclick="zoom(0.9)">➖</button>
+          <button class="control-btn" onclick="moveImage(50,0)">➡️</button>
+          <button class="control-btn" onclick="moveImage(-50,0)">⬅️</button>
+          <button class="control-btn" onclick="moveImage(0,-50)">⬆️</button>
+          <button class="control-btn" onclick="moveImage(0,50)">⬇️</button>
+          <button class="control-btn control-close" onclick="document.body.removeChild(this.closest('.fullscreen-image'))">✖</button>
         </div>
       `;
-      
-      overlay.innerHTML = controls;
-      overlay.appendChild(img);
       document.body.appendChild(overlay);
-
-      // أحداث السحب
-      let isDragging = false;
-      let startX, startY;
-
-      img.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        startX = e.clientX - translateX;
-        startY = e.clientY - translateY;
-      });
-
-      document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        translateX = e.clientX - startX;
-        translateY = e.clientY - startY;
-        img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-      });
-
-      document.addEventListener('mouseup', () => {
-        isDragging = false;
-      });
     }
 
     function moveImage(x, y) {
-      translateX += x;
-      translateY += y;
-      document.querySelector('.fullscreen-image img').style.transform = 
+      translateX += x; translateY += y;
+      document.querySelector('.fullscreen-image img').style.transform =
         `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     }
 
     function zoom(factor) {
       scale *= factor;
-      document.querySelector('.fullscreen-image img').style.transform = 
+      document.querySelector('.fullscreen-image img').style.transform =
         `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     }
 
-    function resetZoom() {
-      scale = 1;
-      translateX = 0;
-      translateY = 0;
-      document.querySelector('.fullscreen-image img').style.transform = 
-        'translate(0, 0) scale(1)';
-    }
-
-    // وضع القراءة
     function toggleReadingMode() {
       const editor = document.getElementById('editor');
       if (!isReadingMode) {
@@ -549,8 +434,6 @@
           <div class="reading-content">${editor.innerHTML}</div>
         `;
         document.body.appendChild(overlay);
-        
-        // إعادة ربط أحداث الصور في وضع القراءة
         overlay.querySelectorAll('img').forEach(img => {
           img.onclick = () => showFullscreenImage(img.src);
         });
@@ -560,56 +443,37 @@
       isReadingMode = !isReadingMode;
     }
 
-    // البحث في النص
     function highlightSearch() {
-      const searchTerm = document.getElementById('searchInput').value;
+      const input = document.getElementById('searchInput');
+      const text = input.value.trim();
       const editor = document.getElementById('editor');
       const content = editor.innerHTML;
+      editor.innerHTML = content.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
+      searchHighlights = [], currentHighlightIndex = -1;
+      if (!text) return;
 
-      // إزالة التمييز السابق
-      searchHighlights.forEach(range => {
-        range.surroundContents(document.createTextNode(range.text));
-      });
-      searchHighlights = [];
-
-      if (searchTerm) {
-        const regex = new RegExp(searchTerm, 'gi');
-        let match;
-        while ((match = regex.exec(content)) !== null) {
-          const range = document.createRange();
-          range.setStart(editor.firstChild, match.index);
-          range.setEnd(editor.firstChild, match.index + match[0].length);
-          const highlight = document.createElement('span');
-          highlight.className = 'highlight';
-          range.surroundContents(highlight);
-          searchHighlights.push({ text: match[0], range });
-        }
-      }
-      currentHighlightIndex = -1; // إعادة تعيين الفهرس
+      const regex = new RegExp(`(${text})`, 'gi');
+      editor.innerHTML = editor.innerHTML.replace(regex, `<span class="highlight">$1</span>`);
+      searchHighlights = [...editor.querySelectorAll('.highlight')];
     }
 
     function nextHighlight() {
-      if (searchHighlights.length === 0) return;
+      if (!searchHighlights.length) return;
       currentHighlightIndex = (currentHighlightIndex + 1) % searchHighlights.length;
-      const highlight = searchHighlights[currentHighlightIndex];
-      highlight.range.startContainer.parentNode.scrollIntoView();
-      highlight.range.startContainer.parentNode.classList.add('highlight');
+      searchHighlights[currentHighlightIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function prevHighlight() {
-      if (searchHighlights.length === 0) return;
+      if (!searchHighlights.length) return;
       currentHighlightIndex = (currentHighlightIndex - 1 + searchHighlights.length) % searchHighlights.length;
-      const highlight = searchHighlights[currentHighlightIndex];
-      highlight.range.startContainer.parentNode.scrollIntoView();
-      highlight.range.startContainer.parentNode.classList.add('highlight');
+      searchHighlights[currentHighlightIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    // الحفظ التلقائي
     function saveContent() {
       if (currentFolderIndex !== null && currentLessonIndex !== null) {
         folders[currentFolderIndex].lessons[currentLessonIndex].content = 
           document.getElementById('editor').innerHTML;
-        localStorage.setItem('folders', JSON.stringify(folders));
+        saveData();
       }
     }
 
@@ -617,7 +481,6 @@
       localStorage.setItem('folders', JSON.stringify(folders));
     }
 
-    // التهيئة الأولية
     renderFolders();
     showPage('foldersPage');
   </script>
