@@ -148,10 +148,11 @@
       left: 20px;
       background: #fff;
       color: #000;
-      padding: 10px 15px;
+      padding: 8px 12px;
       border-radius: 5px;
       cursor: pointer;
       z-index: 3001;
+      font-size: 14px;
     }
 
     .zoom-controls {
@@ -159,21 +160,25 @@
       bottom: 20px;
       right: 20px;
       background: rgba(255,255,255,0.9);
-      padding: 10px;
+      padding: 8px;
       border-radius: 8px;
       display: flex;
       gap: 5px;
+      z-index: 3002;
     }
 
     .arrow-btn {
-      width: 40px;
-      height: 40px;
+      width: 30px;
+      height: 30px;
       background: #3498db;
       color: white;
       border: none;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 20px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .reading-mode-overlay {
@@ -229,12 +234,12 @@
         <button onclick="insertTemplate('answer-box', 'إجابة')">💡 إجابة</button>
         <button onclick="execCommand('bold')">عريض</button>
         <button onclick="execCommand('italic')">مائل</button>
+        <button onclick="execCommand('underline')">﹍</button>
         <input type="color" onchange="changeTextColor(this.value)">
         <input type="color" id="highlighterColor" onchange="setHighlighterColor(this.value)">
         <button onclick="applyHighlight()">🖍️ تمييز</button>
         <input type="file" id="imageInput" accept="image/*" hidden>
         <button onclick="uploadImage()">🖼️ صورة</button>
-        <button onclick="scrollToCenter()">🎯 منتصف</button>
         <button onclick="toggleReadingMode()">📖 قراءة</button>
       </div>
       <div id="editor" contenteditable="true"></div>
@@ -251,7 +256,6 @@
     let translateX = 0;
     let translateY = 0;
 
-    // إدارة الصفحات
     function showPage(pageId) {
       document.querySelectorAll('section').forEach(section => {
         section.style.display = 'none';
@@ -259,7 +263,6 @@
       document.getElementById(pageId).style.display = 'block';
     }
 
-    // المواد
     function addFolder() {
       const name = prompt('أدخل اسم المادة:');
       if (name) {
@@ -306,7 +309,6 @@
       }
     }
 
-    // الدروس
     function addLesson() {
       const name = prompt('أدخل اسم الدرس:');
       if (name) {
@@ -361,7 +363,6 @@
       }
     }
 
-    // المحرر
     function insertTemplate(className, placeholder) {
       const sel = window.getSelection();
       if (!sel.rangeCount) return;
@@ -427,7 +428,6 @@
       reader.readAsDataURL(file);
     });
 
-    // التحكم في الصور
     function showFullscreenImage(src) {
       const overlay = document.createElement('div');
       overlay.className = 'fullscreen-image';
@@ -437,12 +437,12 @@
       
       const controls = `
         <div class="zoom-controls">
-          <button class="arrow-btn" onclick="moveImage(-100, 0)">←</button>
-          <button class="arrow-btn" onclick="moveImage(100, 0)">→</button>
-          <button class="arrow-btn" onclick="moveImage(0, -100)">↑</button>
-          <button class="arrow-btn" onclick="moveImage(0, 100)">↓</button>
-          <button class="arrow-btn" onclick="zoom(1.2)">+</button>
-          <button class="arrow-btn" onclick="zoom(0.8)">-</button>
+          <button class="arrow-btn" onclick="moveImage(-50, 0)">←</button>
+          <button class="arrow-btn" onclick="moveImage(50, 0)">→</button>
+          <button class="arrow-btn" onclick="moveImage(0, -50)">↑</button>
+          <button class="arrow-btn" onclick="moveImage(0, 50)">↓</button>
+          <button class="arrow-btn" onclick="zoom(1.1)">+</button>
+          <button class="arrow-btn" onclick="zoom(0.9)">-</button>
           <button class="arrow-btn" onclick="resetZoom()">⟳</button>
         </div>
         <button class="close-btn" onclick="overlay.remove()">✕ إغلاق</button>
@@ -494,7 +494,6 @@
         'translate(0, 0) scale(1)';
     }
 
-    // وضع القراءة
     function toggleReadingMode() {
       const editor = document.getElementById('editor');
       if (!isReadingMode) {
@@ -515,21 +514,6 @@
       isReadingMode = !isReadingMode;
     }
 
-    // التمرير للمنتصف
-    function scrollToCenter() {
-      const editor = document.getElementById('editor');
-      const selection = window.getSelection();
-      if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        window.scrollTo({
-          top: rect.top + window.scrollY - (window.innerHeight / 2),
-          behavior: 'smooth'
-        });
-      }
-    }
-
-    // الحفظ التلقائي
     function saveContent() {
       if (currentFolderIndex !== null && currentLessonIndex !== null) {
         folders[currentFolderIndex].lessons[currentLessonIndex].content = 
@@ -542,7 +526,6 @@
       localStorage.setItem('folders', JSON.stringify(folders));
     }
 
-    // التهيئة الأولية
     renderFolders();
     showPage('foldersPage');
   </script>
