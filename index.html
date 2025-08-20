@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NOOTBOOKY</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -16,473 +16,625 @@
       background: #2c3e50;
       color: white;
       padding: 1rem;
-      position: fixed;
-      top: 0;
-      width: 100%;
-      height: 60px;
-      z-index: 1000;
-      text-align: center;
+      position: fixed; top: 0; width: 100%; height: 60px;
+      z-index: 1000; text-align: center;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    main {
-      margin-top: 60px;
-      padding: 20px;
-      min-height: calc(100vh - 60px);
-    }
+    main { margin-top: 60px; padding: 20px; min-height: calc(100vh - 60px); }
+
     .toolbar {
-      position: fixed;
-      top: 60px;
-      background: white;
-      padding: 10px 20px;
-      width: 100%;
-      z-index: 999;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      position: fixed; top: 60px; background: white; padding: 10px 20px; width: 100%;
+      z-index: 999; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
+    .toolbar .group { display: flex; gap: 6px; align-items: center; }
+
     .folder, .lesson {
-      background: white;
-      border-radius: 8px;
-      padding: 15px;
-      margin: 10px 0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      position: relative;
-      cursor: pointer;
-      transition: transform 0.2s;
+      background: white; border-radius: 8px; padding: 15px; margin: 10px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative; cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
     }
     .folder:hover, .lesson:hover { transform: translateX(-5px); }
+    .lesson.drag-over { background:#eef7ff; }
+
     .actions {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      gap: 5px;
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      display: flex; gap: 5px;
     }
     button {
-      background-color: #3498db;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      min-width: 60px;
+      background-color: #3498db; color: white; border: none;
+      padding: 6px 12px; border-radius: 5px; cursor: pointer; min-width: 60px;
       transition: all 0.2s;
     }
-    button:hover {
-      opacity: 0.9;
-      transform: scale(0.98);
-    }
+    button:hover { opacity: 0.9; transform: scale(0.98); }
+    .icon-btn { min-width:auto; padding:6px 8px; }
+
     #editor {
-      background: white;
-      min-height: 500px;
-      padding: 30px;
-      border-radius: 10px;
-      margin-top: 130px;
-      line-height: 1.6;
-      font-size: 18px;
-      border: 1px solid #ddd;
-      outline: none;
+      background: white; min-height: 500px; padding: 30px; border-radius: 10px;
+      margin-top: 130px; line-height: 1.6; font-size: 18px; border: 1px solid #ddd; outline: none;
     }
     .title-box { background: #ecf0f1; border-right: 4px solid #3498db; padding: 15px; margin: 20px 0; }
     .question-box { background: #fcf3cf; border-right: 4px solid #f1c40f; padding: 15px; margin: 20px 0; }
     .answer-box { background: #d4efdf; border-right: 4px solid #2ecc71; padding: 15px; margin: 20px 0; }
 
+    .image-thumb { max-width: 150px; max-height: 150px; border-radius: 8px; margin: 10px 0; cursor: zoom-in; display: block; }
+
     /* Fullscreen image viewer */
     .fullscreen-image {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.97);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 3000;
-      flex-direction: column;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.97);
+      display: flex; align-items: center; justify-content: center; z-index: 3000; overflow: hidden;
     }
     .fullscreen-image img {
-      max-width: 90%;
-      max-height: 80%;
-      object-fit: contain;
-      cursor: pointer;
-      transition: transform 0.3s ease;
+      max-width: 90%; max-height: 80%; object-fit: contain; cursor: grab;
+      transition: transform 0.2s ease;
+      /* نحافظ على مركز الصورة أثناء التحريك/التكبير */
     }
+    /* أدوات التحكم أعلى الصورة دومًا */
     .image-controls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 20px;
+      position: fixed; left: 50%; transform: translateX(-50%);
+      bottom: 20px; display: flex; gap: 8px; z-index: 3001; /* أعلى من الصورة */
+      background: rgba(0,0,0,0.35); padding: 8px 10px; border-radius: 999px; backdrop-filter: blur(4px);
     }
     .control-btn {
-      width: 30px;
-      height: 30px;
-      background: rgba(255,255,255,0.9);
-      color: #333;
-      border: none;
-      border-radius: 50%;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      width: 34px; height: 34px; background: rgba(255,255,255,0.95); color: #333;
+      border: none; border-radius: 50%; font-size: 16px; display: flex; align-items: center;
+      justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer;
     }
-    .control-btn:hover {
-      background: #3498db;
-      color: white;
-      transform: scale(1.1);
-    }
-
-    /* Close button with image controls */
-    .image-controls .control-close {
-      background: #e74c3c;
-      color: white;
-      font-size: 16px;
-      width: 40px;
-      height: 30px;
-      border-radius: 6px;
+    .control-btn:hover { background: #3498db; color: white; transform: scale(1.08); }
+    .control-close {
+      background: #e74c3c; color: white; width: 50px; border-radius: 999px; padding: 0 10px;
     }
 
     .reading-mode-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: white;
-      z-index: 2000;
-      padding: 60px 20px 20px;
-      overflow-y: auto;
+      position: fixed; inset: 0; background: white; z-index: 2000;
+      padding: 60px 20px 20px; overflow-y: auto;
     }
     .close-reading-mode {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      background: #e74c3c;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 2001;
-      font-weight: bold;
+      position: fixed; top: 20px; left: 20px; background: #e74c3c; color: white;
+      padding: 10px 15px; border-radius: 5px; cursor: pointer; z-index: 2001; font-weight: bold;
     }
 
-    .search-box {
-      margin-top: 70px;
-      display: flex;
-      gap: 5px;
-    }
-    .search-box input {
-      flex: 1;
-      padding: 6px 10px;
-      font-size: 16px;
-    }
+    .search-box { margin-top: 70px; display: flex; gap: 5px; }
+    .search-box input { flex: 1; padding: 6px 10px; font-size: 16px; }
+    .highlight { background-color: yellow; }
 
-    .highlight {
-      background-color: yellow;
-    }
+    .drag-handle { cursor: grab; font-size: 18px; margin-left: 6px; }
+    .back-btn { margin-bottom:10px; }
   </style>
 </head>
 <body>
-  <header><h1>NOOTBOOKY</h1></header>
+<header><h1>NOOTBOOKY</h1></header>
+<main>
+  <!-- صفحة المواد الدراسية -->
+  <section id="foldersPage">
+    <h2> الأقسام</h2>
+    <div id="foldersList"></div>
+    <button onclick="addFolder()">+  NEW FOLDER📁</button>
+  </section>
 
-  <main>
-    <section id="foldersPage">
-      <h2>الأقسام</h2>
-      <div id="foldersList"></div>
-      <button onclick="addFolder()">+ NEW FOLDER </button>
-    </section>
+  <!-- صفحة الدروس داخل مادة -->
+  <section id="lessonsPage" style="display:none;">
+    <button class="back-btn" onclick="showPage('foldersPage')">← الرجوع</button>
+    <h2 id="currentFolderTitle"></h2>
+    <div id="lessonsList"></div>
+    <button onclick="addLesson()">+ موضوع جديد</button>
+  </section>
 
-    <section id="lessonsPage" style="display:none;">
-      <button class="back-btn" onclick="showPage('foldersPage')">← الرجوع</button>
-      <h2 id="currentFolderTitle"></h2>
-      <div id="lessonsList"></div>
-      <button onclick="addLesson()">+ موضوع جديد</button>
-    </section>
+  <!-- صفحة المحرر -->
+  <section id="editorPage" style="display:none;">
+    <button class="back-btn" onclick="showPage('lessonsPage')">← الرجوع</button>
+    <h2 id="lessonTitle"></h2>
 
-    <section id="editorPage" style="display:none;">
-      <button class="back-btn" onclick="showPage('lessonsPage')">← الرجوع</button>
-      <h2 id="lessonTitle"></h2>
-
-      <div class="toolbar">
-        <button onclick="insertTemplate('title-box', 'عنوان جديد')">📌 عنوان</button>
-        <button onclick="insertTemplate('question-box', 'سؤال جديد')">❓ سؤال</button>
-        
-        <button onclick="execCommand('bold')">عريض</button>
-        <button onclick="execCommand('italic')">مائل</button>
-        <button onclick="execCommand('underline')">﹍</button>
-        <input type="color" onchange="changeTextColor(this.value)">
-        <input type="color" id="highlighterColor" onchange="setHighlighterColor(this.value)">
-        <button onclick="applyHighlight()">🖍️ تمييز</button>
-        <input type="file" id="imageInput" accept="image/*" hidden>
-      
-        <button onclick="toggleReadingMode()">📖 قراءة</button>
-        <div class="search-box">
-          <input type="text" id="searchInput" placeholder="🔍 ابحث في النص..." oninput="highlightSearch()">
-          <button onclick="prevHighlight()">‹</button>
-          <button onclick="nextHighlight()">›</button>
-        </div>
+    <div class="toolbar" id="toolbar">
+      <div class="group">
+        <button onmousedown="noFocus(event)" onclick="insertTemplate('title-box', 'عنوان جديد')">📌 عنوان</button>
+        <button onmousedown="noFocus(event)" onclick="insertTemplate('question-box', 'سؤال جديد')">❓ سؤال</button>
       </div>
 
-      <div id="editor" contenteditable="true"></div>
-    </section>
-  </main>
+      <div class="group">
+        <button class="icon-btn" title="عريض" onmousedown="noFocus(event)" onclick="execCommand('bold')"><b>ع</b></button>
+        <button class="icon-btn" title="تحته خط" onmousedown="noFocus(event)" onclick="execCommand('underline')">﹍</button>
+      </div>
 
-  <script>
-    let folders = JSON.parse(localStorage.getItem('folders')) || [];
-    let currentFolderIndex = null;
-    let currentLessonIndex = null;
-    let highlightColor = '#ffff00';
-    let isReadingMode = false;
-    let scale = 1, translateX = 0, translateY = 0;
-    let searchHighlights = [], currentHighlightIndex = -1;
+      <div class="group">
+        <input type="color" id="textColorPicker" value="#000000" title="اختر لون النص">
+        <button onmousedown="noFocus(event)" onclick="applyTextColor()">تطبيق اللون</button>
+      </div>
 
-    function showPage(pageId) {
-      document.querySelectorAll('section').forEach(s => s.style.display = 'none');
-      document.getElementById(pageId).style.display = 'block';
-    }
+      <div class="group">
+        <input type="color" id="highlighterColor" value="#ffff00" onchange="setHighlighterColor(this.value)" title="لون التمييز">
+        <button onmousedown="noFocus(event)" onclick="applyHighlight()">🖍️ تمييز</button>
+      </div>
 
-    function addFolder() {
-      const name = prompt('أدخل اسم المادة:');
-      if (name) {
-        folders.push({ name, lessons: [] });
-        saveData(); renderFolders();
+      <div class="group">
+        <button onmousedown="noFocus(event)" onclick="uploadImage()">🖼️ صورة</button>
+        <input type="file" id="imageInput" accept="image/*" hidden>
+      </div>
+
+      <div class="group">
+        <button onmousedown="noFocus(event)" onclick="toggleReadingMode()">📖 قراءة</button>
+      </div>
+
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 ابحث في النص..." oninput="highlightSearch()">
+        <button class="icon-btn" onmousedown="noFocus(event)" onclick="prevHighlight()">‹</button>
+        <button class="icon-btn" onmousedown="noFocus(event)" onclick="nextHighlight()">›</button>
+      </div>
+    </div>
+
+    <div id="editor" contenteditable="true"></div>
+  </section>
+</main>
+
+<script>
+/* ===================== IndexedDB Helpers ===================== */
+const DB_NAME = 'notebookyDB';
+const DB_VERSION = 1;
+const STORE = 'kv'; // تخزين مفتاح/قيمة
+let db;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const _db = e.target.result;
+      if (!_db.objectStoreNames.contains(STORE)) {
+        _db.createObjectStore(STORE, { keyPath: 'key' });
       }
+    };
+    req.onsuccess = () => { db = req.result; resolve(db); };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function idbGet(key) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readonly');
+    const store = tx.objectStore(STORE);
+    const getReq = store.get(key);
+    getReq.onsuccess = () => resolve(getReq.result?.value);
+    getReq.onerror = () => reject(getReq.error);
+  });
+}
+
+function idbSet(key, value) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    const store = tx.objectStore(STORE);
+    const putReq = store.put({ key, value });
+    putReq.onsuccess = () => resolve(true);
+    putReq.onerror = () => reject(putReq.error);
+  });
+}
+
+/* ===================== State ===================== */
+let folders = []; // سيُحمَّل من IndexedDB
+let currentFolderIndex = null;
+let currentLessonIndex = null;
+let highlightColor = '#ffff00';
+let isReadingMode = false;
+let scale = 1, translateX = 0, translateY = 0;
+let searchHighlights = [], currentHighlightIndex = -1;
+
+/* ===================== Init ===================== */
+(async function init() {
+  await openDB();
+  // محاولة ترحيل قديم localStorage (اختياري، خفيف)
+  const migrated = localStorage.getItem('__migrated_to_idb__');
+  if (!migrated) {
+    const old = localStorage.getItem('folders');
+    if (old) {
+      try {
+        await idbSet('folders', JSON.parse(old));
+        localStorage.setItem('__migrated_to_idb__', '1');
+      } catch {}
     }
+  }
+  folders = (await idbGet('folders')) || [];
+  renderFolders();
+  showPage('foldersPage');
+})();
 
-    function renderFolders() {
-      const list = document.getElementById('foldersList');
-      list.innerHTML = folders.map((f, i) => `
-        <div class="folder" onclick="openFolder(${i})">
-          ${f.name}
-          <div class="actions">
-            <button onclick="event.stopPropagation(); editFolder(${i})">✏️</button>
-            <button onclick="event.stopPropagation(); deleteFolder(${i})">🗑️</button>
-          </div>
-        </div>
-      `).join('');
-    }
+/* ===================== Navigation ===================== */
+function showPage(id) {
+  document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+}
 
-    function openFolder(i) {
-      currentFolderIndex = i;
-      document.getElementById('currentFolderTitle').textContent = folders[i].name;
-      renderLessons(); showPage('lessonsPage');
-    }
+/* ===================== Folders ===================== */
+function addFolder() {
+  const name = prompt('أدخل اسم المادة:');
+  if (name) {
+    folders.push({ name, lessons: [] });
+    saveData(); renderFolders();
+  }
+}
 
-    function editFolder(i) {
-      const newName = prompt('اسم المادة الجديد:', folders[i].name);
-      if (newName) {
-        folders[i].name = newName;
-        saveData(); renderFolders();
-      }
-    }
+function renderFolders() {
+  const list = document.getElementById('foldersList');
+  list.innerHTML = folders.map((f, i) => `
+    <div class="folder" onclick="openFolder(${i})">
+      ${escapeHtml(f.name)}
+      <div class="actions">
+        <button class="icon-btn" onclick="event.stopPropagation(); editFolder(${i})">✏️</button>
+        <button class="icon-btn" onclick="event.stopPropagation(); deleteFolder(${i})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
 
-    function deleteFolder(i) {
-      if (confirm('هل تريد حذف هذه المادة؟')) {
-        folders.splice(i, 1);
-        saveData(); renderFolders();
-      }
-    }
+function openFolder(i) {
+  currentFolderIndex = i;
+  document.getElementById('currentFolderTitle').textContent = folders[i].name;
+  renderLessons();
+  showPage('lessonsPage');
+}
 
-    function addLesson() {
-      const name = prompt('أدخل اسم الدرس:');
-      if (name) {
-        folders[currentFolderIndex].lessons.push({ name, content: '' });
-        saveData(); renderLessons();
-      }
-    }
+function editFolder(i) {
+  const newName = prompt('اسم المادة الجديد:', folders[i].name);
+  if (newName) { folders[i].name = newName; saveData(); renderFolders(); }
+}
 
-    function renderLessons() {
-      const list = document.getElementById('lessonsList');
-      list.innerHTML = folders[currentFolderIndex].lessons.map((l, i) => `
-        <div class="lesson" onclick="openLesson(${i})">
-          ${l.name}
-          <div class="actions">
-            <button onclick="event.stopPropagation(); editLesson(${i})">✏️</button>
-            <button onclick="event.stopPropagation(); deleteLesson(${i})">🗑️</button>
-          </div>
-        </div>
-      `).join('');
-    }
+function deleteFolder(i) {
+  if (confirm('هل تريد حذف هذه المادة؟')) {
+    folders.splice(i, 1);
+    saveData(); renderFolders();
+  }
+}
 
-    function openLesson(i) {
-      currentLessonIndex = i;
-      const lesson = folders[currentFolderIndex].lessons[i];
-      document.getElementById('lessonTitle').textContent = lesson.name;
-      document.getElementById('editor').innerHTML = lesson.content;
+/* ===================== Lessons + Reorder ===================== */
+function addLesson() {
+  if (currentFolderIndex === null) return;
+  const name = prompt('أدخل اسم الدرس:');
+  if (name) {
+    folders[currentFolderIndex].lessons.push({ name, content: '' });
+    saveData(); renderLessons();
+  }
+}
 
-      setTimeout(() => {
-        document.querySelectorAll('#editor img').forEach(img => {
-          img.onclick = () => showFullscreenImage(img.src);
-        });
-      }, 100);
+function renderLessons() {
+  const list = document.getElementById('lessonsList');
+  const lessons = folders[currentFolderIndex].lessons || [];
+  list.innerHTML = lessons.map((l, i) => `
+    <div class="lesson"
+         onclick="openLesson(${i})"
+         draggable="true"
+         ondragstart="onDragStart(event, ${i})"
+         ondragover="onDragOver(event, ${i})"
+         ondragleave="onDragLeave(event, ${i})"
+         ondrop="onDrop(event, ${i})"
+         data-index="${i}">
+      <span class="drag-handle" title="اسحب لإعادة الترتيب">☰</span>
+      ${escapeHtml(l.name)}
+      <div class="actions" onclick="event.stopPropagation()">
+        <button class="icon-btn" title="أعلى" onclick="moveLessonUp(${i})">↑</button>
+        <button class="icon-btn" title="أسفل" onclick="moveLessonDown(${i})">↓</button>
+        <button class="icon-btn" title="إلى الأعلى" onclick="moveLessonToTop(${i})">⤒</button>
+        <button class="icon-btn" title="إلى الأسفل" onclick="moveLessonToBottom(${i})">⤓</button>
+        <button class="icon-btn" onclick="editLesson(${i})">✏️</button>
+        <button class="icon-btn" onclick="deleteLesson(${i})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
 
-      showPage('editorPage');
-    }
-
-    function editLesson(i) {
-      const newName = prompt('اسم الدرس الجديد:', folders[currentFolderIndex].lessons[i].name);
-      if (newName) {
-        folders[currentFolderIndex].lessons[i].name = newName;
-        saveData(); renderLessons();
-      }
-    }
-
-    function deleteLesson(i) {
-      if (confirm('هل تريد حذف هذا الدرس؟')) {
-        folders[currentFolderIndex].lessons.splice(i, 1);
-        saveData(); renderLessons();
-      }
-    }
-
-    function insertTemplate(className, placeholder) {
-      const sel = window.getSelection();
-      if (!sel.rangeCount) return;
-      const range = sel.getRangeAt(0);
-      const div = document.createElement('div');
-      div.className = className;
-      div.contentEditable = true;
-      div.innerHTML = placeholder;
-      range.deleteContents();
-      range.insertNode(div);
-      range.setStartAfter(div);
-      range.collapse(true);
-      sel.removeAllRanges();
-      sel.addRange(range);
-      saveContent();
-    }
-
-    function execCommand(cmd) {
-      document.execCommand(cmd); saveContent();
-    }
-
-    function setHighlighterColor(c) { highlightColor = c; }
-
-    function applyHighlight() {
-      document.execCommand('styleWithCSS', false, true);
-      document.execCommand('backColor', false, highlightColor);
-      saveContent();
-    }
-
-    function changeTextColor(c) {
-      document.execCommand('foreColor', false, c);
-      saveContent();
-    }
-
-    function uploadImage() {
-      document.getElementById('imageInput').click();
-    }
-
-    document.getElementById('imageInput').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        alert('الحد الأقصى 5MB'); return;
-      }
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
-        img.style.maxWidth = '100%';
-        img.style.cursor = 'zoom-in';
-        img.onclick = () => showFullscreenImage(img.src);
-        document.getElementById('editor').appendChild(img);
-        saveContent();
-      };
-      reader.readAsDataURL(file);
+function openLesson(i) {
+  currentLessonIndex = i;
+  const lesson = folders[currentFolderIndex].lessons[i];
+  document.getElementById('lessonTitle').textContent = lesson.name;
+  document.getElementById('editor').innerHTML = lesson.content || '';
+  setTimeout(() => {
+    document.querySelectorAll('#editor img').forEach(img => {
+      img.onclick = () => showFullscreenImage(img.src);
     });
+  }, 0);
+  showPage('editorPage');
+  focusEditor();
+}
 
-    function showFullscreenImage(src) {
-      const overlay = document.createElement('div');
-      overlay.className = 'fullscreen-image';
+function editLesson(i) {
+  const newName = prompt('اسم الدرس الجديد:', folders[currentFolderIndex].lessons[i].name);
+  if (newName) {
+    folders[currentFolderIndex].lessons[i].name = newName;
+    saveData(); renderLessons();
+    if (currentLessonIndex === i) document.getElementById('lessonTitle').textContent = newName;
+  }
+}
 
+function deleteLesson(i) {
+  if (confirm('هل تريد حذف هذا الدرس؟')) {
+    folders[currentFolderIndex].lessons.splice(i, 1);
+    saveData(); renderLessons();
+    if (currentLessonIndex === i) showPage('lessonsPage');
+  }
+}
+
+// Reorder buttons
+function moveLessonUp(i){
+  if (i<=0) return;
+  const lessons = folders[currentFolderIndex].lessons;
+  [lessons[i-1], lessons[i]] = [lessons[i], lessons[i-1]];
+  saveData(); renderLessons();
+}
+function moveLessonDown(i){
+  const lessons = folders[currentFolderIndex].lessons;
+  if (i>=lessons.length-1) return;
+  [lessons[i+1], lessons[i]] = [lessons[i], lessons[i+1]];
+  saveData(); renderLessons();
+}
+function moveLessonToTop(i){
+  const lessons = folders[currentFolderIndex].lessons;
+  const item = lessons.splice(i,1)[0];
+  lessons.unshift(item);
+  saveData(); renderLessons();
+}
+function moveLessonToBottom(i){
+  const lessons = folders[currentFolderIndex].lessons;
+  const item = lessons.splice(i,1)[0];
+  lessons.push(item);
+  saveData(); renderLessons();
+}
+
+// Drag & Drop
+let draggedIndex = null;
+function onDragStart(e, i){ draggedIndex = i; e.dataTransfer.effectAllowed = 'move'; }
+function onDragOver(e){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); e.dataTransfer.dropEffect = 'move'; }
+function onDragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
+function onDrop(e, i){
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  if (draggedIndex===null || draggedIndex===i) return;
+  const lessons = folders[currentFolderIndex].lessons;
+  const item = lessons.splice(draggedIndex,1)[0];
+  lessons.splice(i,0,item);
+  draggedIndex = null; saveData(); renderLessons();
+}
+
+/* ===================== Editor Tools ===================== */
+function noFocus(e){ e.preventDefault(); } // يمنع بقاء التركيز على زر الأدوات
+
+function focusEditor(){
+  const editor = document.getElementById('editor');
+  editor.focus();
+  const range = document.createRange();
+  range.selectNodeContents(editor);
+  range.collapse(false);
+  const sel = window.getSelection();
+  sel.removeAllRanges(); sel.addRange(range);
+}
+
+function insertTemplate(className, placeholder) {
+  const editor = document.getElementById('editor');
+  const sel = window.getSelection();
+  const range = sel.rangeCount ? sel.getRangeAt(0) : null;
+
+  const div = document.createElement('div');
+  div.className = className;
+  div.contentEditable = "true";
+  div.innerHTML = placeholder;
+
+  if (range) {
+    range.deleteContents();
+    range.insertNode(div);
+    const br = document.createElement('br');
+    div.after(br);
+  } else {
+    editor.appendChild(div);
+    editor.appendChild(document.createElement('br'));
+  }
+  saveContent(); setTimeout(focusEditor, 0);
+}
+
+function execCommand(cmd) { document.execCommand(cmd); saveContent(); }
+
+function applyTextColor(){
+  const color = document.getElementById('textColorPicker').value || '#000000';
+  document.execCommand('styleWithCSS', false, true);
+  document.execCommand('foreColor', false, color);
+  saveContent(); focusEditor();
+}
+
+function setHighlighterColor(c) { highlightColor = c; }
+function applyHighlight(){
+  document.execCommand('styleWithCSS', false, true);
+  document.execCommand('backColor', false, highlightColor);
+  saveContent(); focusEditor();
+}
+
+/* ===================== Image Insert + Compression ===================== */
+document.getElementById('imageInput').addEventListener('change', async function(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  try {
+    const dataUrl = await compressImage(file, {maxSize:1600, quality:0.7}); // جودة عالية حجم أصغر
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    img.className = 'image-thumb';
+    img.onclick = () => showFullscreenImage(img.src);
+
+    const editorEl = document.getElementById('editor');
+    const sel = window.getSelection();
+    if (sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(img);
+      range.setStartAfter(img); range.collapse(true);
+      sel.removeAllRanges(); sel.addRange(range);
+    } else {
+      editorEl.appendChild(img);
+    }
+    saveContent(); focusEditor();
+  } catch(err) {
+    alert('تعذّر معالجة الصورة. جرّب صورة أخرى.');
+    console.error(err);
+  } finally {
+    e.target.value = '';
+  }
+});
+
+function uploadImage(){ document.getElementById('imageInput').click(); }
+
+/**
+ * ضغط صورة باستخدام Canvas
+ * @param {File|Blob} file
+ * @param {{maxSize:number, quality:number}} options
+ * @returns {Promise<string>} DataURL
+ */
+function compressImage(file, {maxSize=1600, quality=0.7}={}){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
       const img = new Image();
-      img.src = src;
-      img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-      overlay.appendChild(img);
+      img.onload = () => {
+        const {width, height} = img;
+        let newW = width, newH = height;
+        // تقليل أكبر بُعد إلى maxSize
+        if (Math.max(width, height) > maxSize) {
+          if (width >= height) {
+            newW = maxSize;
+            newH = Math.round((height / width) * newW);
+          } else {
+            newH = maxSize;
+            newW = Math.round((width / height) * newH);
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = newW; canvas.height = newH;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff'; // خلفية بيضاء للحفاظ على مظهر PNG الشفاف
+        ctx.fillRect(0,0,newW,newH);
+        ctx.drawImage(img, 0, 0, newW, newH);
+        // إخراج JPEG مضغوط
+        const out = canvas.toDataURL('image/jpeg', quality);
+        resolve(out);
+      };
+      img.onerror = reject;
+      img.src = ev.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
-      overlay.innerHTML += `
-        <div class="image-controls">
-          <button class="control-btn" onclick="zoom(1.1)">➕</button>
-          <button class="control-btn" onclick="zoom(0.9)">➖</button>
-          <button class="control-btn" onclick="moveImage(50,0)">➡️</button>
-          <button class="control-btn" onclick="moveImage(-50,0)">⬅️</button>
-          <button class="control-btn" onclick="moveImage(0,-50)">⬆️</button>
-          <button class="control-btn" onclick="moveImage(0,50)">⬇️</button>
-          <button class="control-btn control-close" onclick="document.body.removeChild(this.closest('.fullscreen-image'))">✖</button>
-        </div>
-      `;
-      document.body.appendChild(overlay);
-    }
+/* ===================== Fullscreen Image Viewer (controls always on top) ===================== */
+function showFullscreenImage(src) {
+  // إعادة تعيين التحويلات لكل عرض جديد
+  scale = 1; translateX = 0; translateY = 0;
 
-    function moveImage(x, y) {
-      translateX += x; translateY += y;
-      document.querySelector('.fullscreen-image img').style.transform =
-        `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-    }
+  const overlay = document.createElement('div');
+  overlay.className = 'fullscreen-image';
 
-    function zoom(factor) {
-      scale *= factor;
-      document.querySelector('.fullscreen-image img').style.transform =
-        `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-    }
+  const img = new Image();
+  img.src = src;
+  img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  overlay.appendChild(img);
 
-    function toggleReadingMode() {
-      const editor = document.getElementById('editor');
-      if (!isReadingMode) {
-        const overlay = document.createElement('div');
-        overlay.className = 'reading-mode-overlay';
-        overlay.innerHTML = `
-          <button class="close-reading-mode" onclick="toggleReadingMode()">✕ إغلاق</button>
-          <div class="reading-content">${editor.innerHTML}</div>
-        `;
-        document.body.appendChild(overlay);
-        overlay.querySelectorAll('img').forEach(img => {
-          img.onclick = () => showFullscreenImage(img.src);
-        });
-      } else {
-        document.querySelector('.reading-mode-overlay').remove();
-      }
-      isReadingMode = !isReadingMode;
-    }
+  // أدوات التحكم مثبتة بأسفل وتعلو الصورة دائمًا
+  const controls = document.createElement('div');
+  controls.className = 'image-controls';
+  controls.innerHTML = `
+    <button class="control-btn" title="تكبير" onclick="zoom(1.1)">＋</button>
+    <button class="control-btn" title="تصغير" onclick="zoom(0.9)">－</button>
+    <button class="control-btn" title="يمين" onclick="moveImage(50,0)">➡️</button>
+    <button class="control-btn" title="يسار" onclick="moveImage(-50,0)">⬅️</button>
+    <button class="control-btn" title="أعلى" onclick="moveImage(0,-50)">⬆️</button>
+    <button class="control-btn" title="أسفل" onclick="moveImage(0,50)">⬇️</button>
+    <button class="control-btn" title="إعادة" onclick="resetImage()">⟳</button>
+    <button class="control-btn control-close" title="إغلاق" onclick="closeFullscreen()">إغلاق</button>
+  `;
+  overlay.appendChild(controls);
 
-    function highlightSearch() {
-      const input = document.getElementById('searchInput');
-      const text = input.value.trim();
-      const editor = document.getElementById('editor');
-      const content = editor.innerHTML;
-      editor.innerHTML = content.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
-      searchHighlights = [], currentHighlightIndex = -1;
-      if (!text) return;
+  document.body.appendChild(overlay);
+}
 
-      const regex = new RegExp(`(${text})`, 'gi');
-      editor.innerHTML = editor.innerHTML.replace(regex, `<span class="highlight">$1</span>`);
-      searchHighlights = [...editor.querySelectorAll('.highlight')];
-    }
+function moveImage(x, y) {
+  translateX += x; translateY += y;
+  const img = document.querySelector('.fullscreen-image img');
+  if (img) img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+}
+function zoom(factor) {
+  scale *= factor;
+  const img = document.querySelector('.fullscreen-image img');
+  if (img) img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+}
+function resetImage(){
+  scale = 1; translateX = 0; translateY = 0;
+  const img = document.querySelector('.fullscreen-image img');
+  if (img) img.style.transform = `translate(0px, 0px) scale(1)`;
+}
+function closeFullscreen(){
+  const overlay = document.querySelector('.fullscreen-image');
+  if (overlay) overlay.remove();
+}
 
-    function nextHighlight() {
-      if (!searchHighlights.length) return;
-      currentHighlightIndex = (currentHighlightIndex + 1) % searchHighlights.length;
-      searchHighlights[currentHighlightIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+/* ===================== Reading Mode ===================== */
+function toggleReadingMode() {
+  const editor = document.getElementById('editor');
+  if (!isReadingMode) {
+    const overlay = document.createElement('div');
+    overlay.className = 'reading-mode-overlay';
+    overlay.innerHTML = `
+      <button class="close-reading-mode" onclick="toggleReadingMode()">✕ إغلاق</button>
+      <div class="reading-content">${editor.innerHTML}</div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.querySelectorAll('img').forEach(img => {
+      img.onclick = () => showFullscreenImage(img.src);
+    });
+  } else {
+    const exist = document.querySelector('.reading-mode-overlay');
+    if (exist) exist.remove();
+  }
+  isReadingMode = !isReadingMode;
+}
 
-    function prevHighlight() {
-      if (!searchHighlights.length) return;
-      currentHighlightIndex = (currentHighlightIndex - 1 + searchHighlights.length) % searchHighlights.length;
-      searchHighlights[currentHighlightIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+/* ===================== Search ===================== */
+function highlightSearch() {
+  const input = document.getElementById('searchInput');
+  const text = input.value.trim();
+  const editor = document.getElementById('editor');
+  const content = editor.innerHTML;
+  editor.innerHTML = content.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
+  searchHighlights = []; currentHighlightIndex = -1;
+  if (!text) return;
 
-    function saveContent() {
-      if (currentFolderIndex !== null && currentLessonIndex !== null) {
-        folders[currentFolderIndex].lessons[currentLessonIndex].content = 
-          document.getElementById('editor').innerHTML;
-        saveData();
-      }
-    }
+  const escaped = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escaped})`, 'gi');
+  editor.innerHTML = editor.innerHTML.replace(regex, `<span class="highlight">$1</span>`);
+  searchHighlights = [...editor.querySelectorAll('.highlight')];
+  saveContent(); // المحتوى تغيّر (إضافة span)
+}
+function nextHighlight() {
+  if (!searchHighlights.length) return;
+  currentHighlightIndex = (currentHighlightIndex + 1) % searchHighlights.length;
+  searchHighlights[currentHighlightIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function prevHighlight() {
+  if (!searchHighlights.length) return;
+  currentHighlightIndex = (currentHighlightIndex - 1 + searchHighlights.length) % searchHighlights.length;
+  searchHighlights[currentHighlightIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
 
-    function saveData() {
-      localStorage.setItem('folders', JSON.stringify(folders));
-    }
+/* ===================== Save ===================== */
+function saveContent() {
+  if (currentFolderIndex !== null && currentLessonIndex !== null) {
+    folders[currentFolderIndex].lessons[currentLessonIndex].content =
+      document.getElementById('editor').innerHTML;
+    saveData();
+  }
+}
+function saveData() { idbSet('folders', folders).catch(console.error); }
 
-    renderFolders();
-    showPage('foldersPage');
-  </script>
+/* ===================== Utils ===================== */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+
+/* Auto-save hooks */
+const editorEl = document.getElementById('editor');
+editorEl.addEventListener('input', saveContent);
+editorEl.addEventListener('paste', () => setTimeout(saveContent, 100));
+editorEl.addEventListener('blur', saveContent);
+</script>
 </body>
 </html>
